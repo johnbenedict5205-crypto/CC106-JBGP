@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 900px;
+            margin: 60px auto;
+            background: white;
+            padding: 35px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #222;
+        }
+
+        .welcome {
+            font-size: 18px;
+            margin: 20px 0;
+        }
+
+        .message {
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .directory-btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px;
+        }
+
+        .directory-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .logout-btn:hover {
+            background-color: #b02a37;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Staff Dashboard</h1>
+
+        <p class="welcome">
+            Welcome, {{ request.user.username }}!
+        </p>
+
+        <p class="message">
+            You are authorized to access the Student Record Management System.
+        </p>
+
+        <a href="{% url 'student_list' %}" class="directory-btn">
+            View Student Directory
+        </a>
+
+        <form method="POST" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">
+                Logout
+            </button>
+        </form>
+
+    </div>
+
+</body>
+</html>

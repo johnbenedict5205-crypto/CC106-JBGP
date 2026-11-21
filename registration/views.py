@@ -2,12 +2,24 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
 from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
 
 from .models import Student
 from .forms import StudentForm
 
 
-# ORIGINAL STUDENT REGISTRATION
+# CHECK IF USER IS AN AUTHORIZED STAFF MEMBER
+def staff_check(user):
+    return user.is_authenticated and user.is_staff
+
+
+# STAFF DASHBOARD
+@user_passes_test(staff_check, login_url='login')
+def staff_dashboard(request):
+    return render(request, 'registration/dashboard.html')
+
+
+# ORIGINAL STUDENT REGISTRATION - PUBLIC ACCESS
 def student_registration(request):
     if request.method == 'POST':
         student_id = request.POST.get('student_id')
@@ -31,12 +43,13 @@ def student_registration(request):
     return render(request, 'registration/registration.html')
 
 
-# REGISTRATION SUCCESS PAGE
+# REGISTRATION SUCCESS PAGE - PUBLIC ACCESS
 def registration_success(request):
     return render(request, 'registration/success.html')
 
 
-# STUDENT DIRECTORY AND SEARCH
+# STUDENT DIRECTORY AND SEARCH - STAFF ONLY
+@user_passes_test(staff_check, login_url='login')
 def student_list(request):
     query = request.GET.get('q', '').strip()
 
@@ -64,7 +77,8 @@ def student_list(request):
     )
 
 
-# STUDENT DETAIL PAGE
+# STUDENT DETAIL PAGE - STAFF ONLY
+@user_passes_test(staff_check, login_url='login')
 def student_detail(request, pk):
     student = get_object_or_404(Student, pk=pk)
 
@@ -75,7 +89,8 @@ def student_detail(request, pk):
     )
 
 
-# CREATE NEW STUDENT
+# CREATE NEW STUDENT - STAFF ONLY
+@user_passes_test(staff_check, login_url='login')
 def student_create(request):
     if request.method == 'POST':
         form = StudentForm(request.POST)
@@ -100,7 +115,8 @@ def student_create(request):
     )
 
 
-# UPDATE EXISTING STUDENT
+# UPDATE EXISTING STUDENT - STAFF ONLY
+@user_passes_test(staff_check, login_url='login')
 def student_update(request, pk):
     student = get_object_or_404(Student, pk=pk)
 
@@ -128,7 +144,8 @@ def student_update(request, pk):
     )
 
 
-# DELETE STUDENT
+# DELETE STUDENT - STAFF ONLY
+@user_passes_test(staff_check, login_url='login')
 def student_delete(request, pk):
     student = get_object_or_404(Student, pk=pk)
 

@@ -13,6 +13,16 @@
 
     <h1>Student Directory</h1>
 
+    <p>
+        Welcome, {{ request.user.username }}!
+    </p>
+
+    <!-- LOGOUT BUTTON -->
+    <form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
+
     {% if messages %}
         {% for message in messages %}
             <p>{{ message }}</p>

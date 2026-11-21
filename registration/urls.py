@@ -7,6 +7,9 @@ urlpatterns = [
     path('', views.student_registration, name='student_registration'),
     path('success/', views.registration_success, name='registration_success'),
 
+    # STAFF DASHBOARD
+    path('dashboard/', views.staff_dashboard, name='staff_dashboard'),
+
     # STUDENT DIRECTORY
     path('students/', views.student_list, name='student_list'),
 
