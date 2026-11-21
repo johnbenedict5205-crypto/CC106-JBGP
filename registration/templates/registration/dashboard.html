@@ -1,100 +1,184 @@
 
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Dashboard</title>
+    <title>Student Management Dashboard</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            width: 80%;
-            max-width: 900px;
-            margin: 60px auto;
-            background: white;
-            padding: 35px;
-            border-radius: 10px;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        h1 {
-            color: #222;
-        }
-
-        .welcome {
-            font-size: 18px;
-            margin: 20px 0;
-        }
-
-        .message {
-            color: #555;
-            margin-bottom: 30px;
-        }
-
-        .directory-btn {
-            display: inline-block;
-            background-color: #007bff;
-            color: white;
-            padding: 12px 25px;
-            text-decoration: none;
-            border-radius: 5px;
-            margin: 10px;
-        }
-
-        .directory-btn:hover {
-            background-color: #0056b3;
-        }
-
-        .logout-btn {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 10px;
-        }
-
-        .logout-btn:hover {
-            background-color: #b02a37;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'registration/style.css' %}">
 </head>
 
 <body>
 
-    <div class="container">
+<main class="dashboard-container">
 
-        <h1>Staff Dashboard</h1>
+    <!-- DASHBOARD HEADER -->
+    <header class="dashboard-header">
+        <div>
+            <h1>Student Management Dashboard</h1>
+            <p>Welcome, {{ request.user.username }}!</p>
+            <p>You are logged in as an authorized staff user.</p>
+        </div>
 
-        <p class="welcome">
-            Welcome, {{ request.user.username }}!
-        </p>
-
-        <p class="message">
-            You are authorized to access the Student Record Management System.
-        </p>
-
-        <a href="{% url 'student_list' %}" class="directory-btn">
-            View Student Directory
-        </a>
-
-        <form method="POST" action="{% url 'logout' %}">
+        <form method="post" action="{% url 'logout' %}">
             {% csrf_token %}
-            <button type="submit" class="logout-btn">
-                Logout
-            </button>
+            <button type="submit">Log Out</button>
+        </form>
+    </header>
+
+    <!-- DASHBOARD ACTIONS -->
+    <section class="dashboard-actions">
+        <a class="directory-link" href="{% url 'student_list' %}">
+            Open Student Directory
+        </a>
+    </section>
+
+    <!-- SUMMARY CARDS -->
+    <section class="summary-grid">
+
+        <article class="summary-card total-card">
+            <h2>Total Students</h2>
+            <p class="summary-number">{{ total_students }}</p>
+        </article>
+
+        <article class="summary-card male-card">
+            <h2>Male Students</h2>
+            <p class="summary-number">{{ male_students }}</p>
+        </article>
+
+        <article class="summary-card female-card">
+            <h2>Female Students</h2>
+            <p class="summary-number">{{ female_students }}</p>
+        </article>
+
+    </section>
+
+    <!-- GENDER OVERVIEW -->
+    <section class="report-section">
+        <h2>Student Gender Overview</h2>
+
+        <div class="gender-row">
+            <div class="gender-label">
+                <span>Male</span>
+                <strong>
+                    {{ male_students }}
+                    ({{ male_percent|floatformat:1 }}%)
+                </strong>
+            </div>
+
+            <div class="bar-track">
+                <progress class="bar-fill male-bar"
+                          value="{{ male_percent|floatformat:4 }}"
+                          max="100"
+                          aria-label="Male student percentage">
+                    {{ male_percent|floatformat:1 }}%
+                </progress>
+            </div>
+        </div>
+
+        <div class="gender-row">
+            <div class="gender-label">
+                <span>Female</span>
+                <strong>
+                    {{ female_students }}
+                    ({{ female_percent|floatformat:1 }}%)
+                </strong>
+            </div>
+
+            <div class="bar-track">
+                <progress class="bar-fill female-bar"
+                          value="{{ female_percent|floatformat:4 }}"
+                          max="100"
+                          aria-label="Female student percentage">
+                    {{ female_percent|floatformat:1 }}%
+                </progress>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- STUDENT REPORT -->
+    <section class="report-section">
+
+        <h2>Student Report</h2>
+
+        <!-- SEARCH FORM -->
+        <form method="get"
+              action="{% url 'staff_dashboard' %}"
+              class="search-form">
+
+            <label for="student-search">
+                Search by Student ID or Name
+            </label>
+
+            <input
+                type="text"
+                id="student-search"
+                name="q"
+                value="{{ query }}"
+                placeholder="Enter student ID or name"
+            >
+
+            <button type="submit">Search</button>
+
+            <a class="clear-search"
+               href="{% url 'staff_dashboard' %}">
+                Clear
+            </a>
+
         </form>
 
-    </div>
+        <!-- STUDENT TABLE -->
+        <div class="table-wrapper">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Gender</th>
+                        <th>Date of Birth</th>
+                        <th>Contact No.</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.student_id }}</td>
+                        <td>{{ student.first_name }}</td>
+                        <td>{{ student.last_name }}</td>
+                        <td>{{ student.gender }}</td>
+                        <td>{{ student.date_of_birth }}</td>
+                        <td>{{ student.contact_no }}</td>
+                        <td class="action-links">
+                            <a href="{% url 'student_detail' student.pk %}">View</a>
+                            <a href="{% url 'student_update' student.pk %}">Edit</a>
+                            <a href="{% url 'student_delete' student.pk %}">Delete</a>
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="empty-message">
+                            No student records found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
 
 </body>
 </html>

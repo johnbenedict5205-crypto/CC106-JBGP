@@ -13,10 +13,68 @@ def staff_check(user):
     return user.is_authenticated and user.is_staff
 
 
-# STAFF DASHBOARD
+# STAFF DASHBOARD - MODULE 09 ENHANCED
 @user_passes_test(staff_check, login_url='login')
 def staff_dashboard(request):
-    return render(request, 'registration/dashboard.html')
+
+    # 1. Count all Student records
+    total_students = Student.objects.count()
+
+    # 2. Count Male and Female students
+    male_students = Student.objects.filter(
+        Q(gender__iexact='M') |
+        Q(gender__iexact='Male')
+    ).count()
+
+    female_students = Student.objects.filter(
+        Q(gender__iexact='F') |
+        Q(gender__iexact='Female')
+    ).count()
+
+    # 3. Calculate percentages safely
+    male_percent = (
+        male_students / total_students * 100
+        if total_students > 0 else 0
+    )
+
+    female_percent = (
+        female_students / total_students * 100
+        if total_students > 0 else 0
+    )
+
+    # 4. Read search term from URL
+    query = request.GET.get('q', '').strip()
+
+    # 5. Prepare student report
+    students = Student.objects.all().order_by(
+        'last_name',
+        'first_name'
+    )
+
+    # 6. Filter report when search term is supplied
+    if query:
+        students = students.filter(
+            Q(student_id__icontains=query) |
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query)
+        )
+
+    # 7. Send values to dashboard template
+    context = {
+        'total_students': total_students,
+        'male_students': male_students,
+        'female_students': female_students,
+        'male_percent': male_percent,
+        'female_percent': female_percent,
+        'students': students,
+        'query': query,
+    }
+
+    return render(
+        request,
+        'registration/dashboard.html',
+        context
+    )
 
 
 # ORIGINAL STUDENT REGISTRATION - PUBLIC ACCESS
